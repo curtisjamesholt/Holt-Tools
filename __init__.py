@@ -317,7 +317,6 @@ class OBJECT_PT_HoltToolsInfo(Panel):
 
         row = column.row()
         row.scale_y = 1.2
-        row.operator("wm.url_open", text = "Gumroad", icon='WORLD').url = "https://gumroad.com/l/BY-GEN"
         row.operator("wm.url_open", text = "Donate", icon='WORLD').url = "https://www.curtisholt.online/donate"
         #----------
 
