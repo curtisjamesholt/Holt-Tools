@@ -305,7 +305,6 @@ class OBJECT_PT_HoltToolsInfo(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
-        bytool = scene.by_tool
 
         #Operations Layout
         box = layout.box()
