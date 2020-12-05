@@ -464,17 +464,25 @@ def select_objects_with_modifiers():
             select_object(obj)
 
 # Custom Selection
-def get_objects_including(include):
+def get_objects_including(include, case_sensitive = True):
     objlist = []
     for o in bpy.data.objects:
-        if include in o.name:
-            objlist.append(o)
+        if case_sensitive is True:
+            if include in o.name:
+                objlist.append(o)
+        else:
+            if (include.lower() in o.name) or (include.upper() in o.name) or (include in o.name):
+                objlist.append(o)
     return objlist
 
-def select_objects_including(include):
+def select_objects_including(include, case_sensitive = True):
     for o in bpy.data.objects:
-        if include in o.name:
-            o.select_set(True)
+        if case_sensitive is True:
+            if include in o.name:
+                o.select_set(True)
+        else:
+            if (include.lower() in o.name) or (include.upper() in o.name) or (include in o.name):
+                o.select_set(True)
 
 def get_objects_by_vertex(count = 0, mode="EQUAL"):
     cmode = mode.upper()
@@ -1388,6 +1396,19 @@ def light_power_add(val = 0, ref = None):
 
 def light_intensity_add(val = 0, ref = None):
     light_power_add(val,ref)
+
+def light_power_multiply(val = 0, ref = None):
+    objlist = []
+    if ref is None:
+        objlist = so()
+    else:
+        objlist = [ref]
+    for o in objlist:
+        o.data.energy *= val
+
+def light_intensity_multiply(val = 0, ref = None):
+    light_power_multiply(val,ref)
+
 #endregion
 #region MESHES
 # Creates a mesh - (string) name
@@ -1648,9 +1669,10 @@ def delete_material(ref):
         matref = ref
     bpy.data.materials.remove(matref)
 
-def get_material(ref=None):
-    objref = get_object(ref)
-    return objref.material_slots[0].material
+def get_material(matname):
+    for m in bpy.data.materials:
+        if m.name == matname:
+            return m
 
 def add_material_to_object(ref, mat):
     objref = None
@@ -1690,6 +1712,10 @@ def get_materials(ref = None):
         get_materials_from_object(ref)
     else:
         return bpy.data.materials
+
+def get_material_from_object(ref):
+    objref = get_object(ref)
+    return objref.material_slots[0].material
 
 def get_materials_from_object(ref):
     objref = get_object(ref)
@@ -2308,8 +2334,8 @@ def suffix_convert_dataset(data):
         nn = d.name
         if '_' in d.name:
             r = d.name.split('_')
-            if '.' in r[1]:
-                r2 = r[1].split('.')
+            if '.' in r[-1]:
+                r2 = r[-1].split('.')
                 if r2[0].isdigit():
                     val = int(r2[0]) + int(r2[1])
                     nn = r[0] + '_' + str(val)
@@ -2317,11 +2343,20 @@ def suffix_convert_dataset(data):
                     while nn in data:
                         nn = r[0] + '_' + str(val + i)
                         i += 1
+                else:
+                    if r2[1].isdigit():
+                        val = int(r2[1])
+                        i = 0
+                        nn = ""
+                        while i < len(r)-1:
+                            nn = nn + r[i] + "_"
+                            i+=1
+                        nn = nn + r2[0] + "_" + str(val)
         else:
             if '.' in d.name:
                 r = d.name.split('.')
-                if r[1].isdigit():
-                    val = int(r[1])
+                if r[-1].isdigit():
+                    val = int(r[-1])
                     nn = r[0] + '_' + str(val)
                     i = 1
                     while nn in data:
@@ -2339,4 +2374,13 @@ def convert_suffixes_underscore():
 def convert_suffixes():
     convert_suffixes_underscore()
 
+def add_prefix_to_name(ref, prefix, delim="_"):
+    objlist = make_obj_list(ref)
+    for o in objlist:
+        o.name = prefix + delim + o.name
+
+def add_suffix_to_name(ref, suffix, delim="_"):
+    objlist = make_obj_list(ref)
+    for o in objlist:
+        o.name = o.name + delim + suffix
 #endregion

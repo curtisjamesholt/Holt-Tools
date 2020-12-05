@@ -1,0 +1,35 @@
+4/12/2020
+- Select all type options rearranged to alphabetical order.
+- Drop-down menu added to Cleanup panel to switch between 'Outliner' and 'Object' options.
+- Added operators to the Object cleanup mode:
+    ( Only appears in edit mode )
+    - Recalculate Normals
+    - Merge By Distance
+    ( Appears in all modes )
+    - Clear Custom Split Normals
+    - Clear Keyframes
+    - Set Auto Smooth (with angle property box)
+- Drop-down menu for the Selection panel.
+    - Select All Including
+    - Select All Type
+    - Select By Vertex
+- Vertex count property for entering count to be compared against.
+- Comparison mode drop-down to choose how to compare vertex count.
+- Operator to perform vertex count comparison to select objects.
+- Section added under 'Select All Including' for tagging objects:
+    - Prefixes
+    - Suffixes
+- Added delimiter property so user can set string to separate added tags.
+- Added light mode drop-down to choose different ways to adjust light strength:
+    - Additive
+    - Multiplicative
+- Added light target drop-down to choose target for light strength change:
+    - Light Objects
+    - Emissive Materials
+- Multiplicative mode now has its own buttons and layout for modifying intensity.
+- String properties added to help filter materials and nodes for emissive lighting changes:
+    - Material Name Includes
+    - Node Name Includes
+- Quick decimate now works with multiple objects selected.
+- Suffix conversion now supports names with multiple underscore segments.
+- Select All Including now has a case-sensitive tick-box option.
