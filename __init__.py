@@ -432,17 +432,19 @@ class OBJECT_PT_HoltToolsCleanup(Panel):
             row.operator("outliner.deep_clean", text = "^ Deep Clean ^")
             row = col.row(align=True)
         if ht_tool.cleanup_mode == "OBJECT":
-            if context.active_object.mode == 'EDIT':
-                row = col.row()
-                row.separator()
-                row = col.row()
-                row.operator("mesh.normals_make_consistent", text="Recalculate Normals")
-                row = col.row()
-                row.operator("mesh.remove_doubles", text="Merge By Distance")
-                row = col.row()
-                row.separator()
-            else:
-                row = col.label(text="( more in edit mode )")
+            if context.active_object != None:
+                if context.active_object.mode == 'EDIT':
+                    row = col.row()
+                    row.separator()
+                    row = col.row()
+                    row.operator("mesh.normals_make_consistent", text="Recalculate Normals")
+                    row = col.row()
+                    row.operator("mesh.remove_doubles", text="Merge By Distance")
+                    row = col.row()
+                    row.separator()
+            if context.active_object != None:
+                if context.active_object.mode == 'OBJECT':
+                    row = col.label(text="( more in edit mode )")
             row = col.row()
             row.operator("mesh.customdata_custom_splitnormals_clear", text="Clean Custom Split Normals")
             row = col.row()
