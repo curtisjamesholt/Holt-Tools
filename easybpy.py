@@ -2157,6 +2157,10 @@ def organize_outliner():
     ce = collection_exists
     gc = get_collection
 
+    if bpy.context.active_object != None:
+        if bpy.context.active_object.mode != 'OBJECT':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
     # Cameras
     d()
     select_all_cameras()
