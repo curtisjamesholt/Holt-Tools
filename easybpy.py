@@ -1,6 +1,6 @@
 #region INFO
 '''
-    == EasyBPY 0.0.9 ==
+    == EasyBPY 0.1.1 ==
     Managed by Curtis Holt
     https://curtisholt.online/links
     ---
@@ -651,6 +651,130 @@ def create_text_object():
 def create_text():
     return create_text_object()
 
+#endregion
+#region OBJECTS - CONSTRAINTS
+def add_constraint(type, ref = None, name = ""):
+    objref = get_object(ref)
+    new_con = objref.constraints.new(type)
+    if name : 
+        new_con.name = name
+    for area in bpy.context.screen.areas:
+        if area.type == 'PROPERTIES':
+            area.tag_redraw()
+    return new_con
+
+def get_constraint(name, ref = None):
+    objref = get_object(ref)
+
+    # we assume name is string
+    if name in objref.constraints:
+        return objref.constraints[name]
+    else:
+        # Maybe return the 1st constraint on selected object?
+        return None
+
+def get_constraints_by_type(type,ref = None):
+    objref = get_object(ref)
+    constraints = [con for con in objref.constraints if con.type == type]
+    return constraints
+
+def remove_constraint(name = None, ref = None):
+    objref = get_object(ref)
+
+    if name is not None:
+        if is_string(name):
+            if name in objref.constraints:
+                mod = get_constraint(name,objref)
+                objref.constraints.remove(mod)
+        else:
+            objref.constraints.remove(name)
+    else:
+        remove_constraint(objref.constraints[0])
+    
+    for area in bpy.context.screen.areas:
+        if area.type == 'PROPERTIES':
+            area.tag_redraw()
+
+def add_camera_solver_constraint(ref = None, name = ""):
+    return add_constraint('CAMERA_SOLVER', ref, name)
+
+def add_follow_track_constraint(ref = None, name = ""):
+    return add_constraint('FOLLOW_TRACK', ref, name)
+
+def add_object_solver_constraint(ref = None, name = ""):
+    return add_constraint('OBJECT_SOLVER', ref, name)
+
+def add_copy_location_constraint(ref = None, name = ""):
+    return add_constraint('COPY_LOCATION', ref, name)
+
+def add_copy_rotation_constraint(ref = None, name = ""):
+    return add_constraint('COPY_ROTATION', ref, name)
+
+def add_copy_scale_constraint(ref = None, name = ""):
+    return add_constraint('COPY_SCALE', ref, name)
+
+def add_copy_transforms_constraint(ref = None, name = ""):
+    return add_constraint('COPY_TRANSFORMS', ref, name)
+
+def add_limit_distance_constraint(ref = None, name = ""):
+    return add_constraint('LIMIT_DISTANCE', ref, name)
+
+def add_limit_location_constraint(ref = None, name = ""):
+    return add_constraint('LIMIT_LOCATION', ref, name)
+
+def add_limit_rotation_constraint(ref = None, name = ""):
+    return add_constraint('LIMIT_ROTATION', ref, name)
+
+def add_limit_scale_constraint(ref = None, name = ""):
+    return add_constraint('LIMIT_SCALE', ref, name)
+
+def add_maintain_volume_constraint(ref = None, name = ""):
+    return add_constraint('MAINTAIN_VOLUME', ref, name)
+
+def add_transform_constraint(ref = None, name = ""):
+    return add_constraint('TRANSFORM', ref, name)
+
+def add_transformation_constraint(ref = None, name = ""):
+    return add_constraint('TRANSFORM', ref, name)
+
+def add_transform_cache_constraint(ref = None, name = ""):
+    return add_constraint('TRANSFORM_CACHE', ref, name)
+
+def add_clamp_to_constraint(ref = None, name = ""):
+    return add_constraint('CLAMP_TO', ref, name)
+
+def add_damped_track_constraint(ref = None, name = ""):
+    return add_constraint('DAMPED_TRACK', ref, name)
+
+def add_locked_track_constraint(ref = None, name = ""):
+    return add_constraint('LOCKED_TRACK', ref, name)
+
+def add_stretch_to_constraint(ref = None, name = ""):
+    return add_constraint('STRETCH_TO', ref, name)
+
+def add_track_to_constraint(ref = None, name = ""):
+    return add_constraint('TRACK_TO', ref, name)
+
+def add_action_constraint(ref = None, name = ""):
+    return add_constraint('ACTION', ref, name)
+
+def add_armature_constraint(ref = None, name = ""):
+    return add_constraint('ARMATURE', ref, name)
+
+def add_child_of_constraint(ref = None, name = ""):
+    return add_constraint('CHILD_OF', ref, name)
+
+def add_floor_constraint(ref = None, name = ""):
+    return add_constraint('FLOOR', ref, name)
+
+def add_follow_path_constraint(ref = None, name = ""):
+    return add_constraint('FOLLOW_PATH', ref, name)
+
+def add_pivot_constraint(ref = None, name = ""):
+    return add_constraint('PIVOT', ref, name)
+
+def add_shrinkwrap_constraint(ref = None, name = ""):
+    return add_constraint('SHRINKWRAP', ref, name)
 #endregion
 #region MODES
 def set_mode(ref=None, newmode=None):
@@ -1408,7 +1532,6 @@ def light_power_multiply(val = 0, ref = None):
 
 def light_intensity_multiply(val = 0, ref = None):
     light_power_multiply(val,ref)
-
 #endregion
 #region MESHES
 # Creates a mesh - (string) name
@@ -1581,6 +1704,7 @@ def link_object_to_collection(ref, col):
         objref = get_object(ref)
         bpy.data.collections[col].objects.link(objref)
     else:
+        # Check for bad return argument
         if isinstance(col, bool)!=True:
             objref = get_object(ref)
             col.objects.link(objref)
@@ -1703,6 +1827,18 @@ def remove_material_from_object(ref, matname):
 
 def remove_material(ref, matname):
     return remove_material_from_object(ref, matname)
+
+def remove_unused_material_slots(ref = None):
+    objrefs = get_objects(ref)
+    for o in objrefs:
+        data = o.data
+        tmp = data.materials.items()
+        data.materials.clear()
+        for item in tmp:
+            data.materials.append(item[1])
+
+def remove_unused_slots(ref = None):
+    remove_unused_material_slots(ref)
 
 def get_all_materials():
     return bpy.data.materials
@@ -1843,13 +1979,21 @@ def delete_image(ref):
 
 #endregion
 #region MODIFIERS 
-def add_modifier(ref, name, id):
-    objref = get_object(ref)
-    new_mod = objref.modifiers.new(name, id)
+def add_modifier(ref = None, name = "Modifier", id="SUBSURF"):
+    objrefs = get_objects(ref)
+    new_mods = []
+    for o in objrefs:
+        new_mod = o.modifiers.new(name, id)
+        new_mods.append(new_mod)
+
     for area in bpy.context.screen.areas:
         if area.type == 'PROPERTIES':
             area.tag_redraw()
-    return new_mod
+    
+    if len(new_mods)>1:
+        return new_mods
+    else:
+        return new_mods[0]
 
 def get_modifier(ref, name):
     objref = get_object(ref)
@@ -1860,23 +2004,30 @@ def get_modifier(ref, name):
     else:
         return False
 
-def remove_modifier(ref, name):
-    objref = None
-    if is_string(ref):
-        objref = get_object(ref)
+def remove_modifier(ref = None, name = None):
+    objref = get_object(ref)
+    if name is not None:
+        if is_string(name):
+            if name in objref.modifiers:
+                mod = get_modifier(objref,name)
+                objref.modifiers.remove(mod)
+        else:
+            objref.modifiers.remove(name)
     else:
-        objref = ref
-
-    if is_string(name):
-        if name in objref.modifiers:
-            mod = get_modifier(objref,name)
-            objref.modifiers.remove(mod)
-    else:
-        objref.modifiers.remove(name)
+        objref.modifiers.remove(objref.modifiers[0])
     
     for area in bpy.context.screen.areas:
         if area.type == 'PROPERTIES':
             area.tag_redraw()
+
+def remove_modifiers(ref = None):
+    objref = get_objects(ref)
+    for o in objref:
+        for m in o.modifiers:
+            o.modifiers.remove(m)
+
+def remove_all_modifiers(ref = None):
+    remove_modifiers(ref)
 
 def apply_all_modifiers(ref = None):
     objref = get_object(ref)

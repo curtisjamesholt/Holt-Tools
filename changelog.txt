@@ -1,3 +1,11 @@
+=== 0.0.3 ===
+
+- EasyBPY updated to 0.1.1.
+- Lighting - Principled BSDF emission values are changed with global material lighting changes.
+- New section created under cleanup panel for 'Materials'.
+- Added 'Remove Unused Slots' to purge all empty material slots on selected objects.
+
+=== 0.0.2 ===
 4/12/2020
 - Select all type options rearranged to alphabetical order.
 - Drop-down menu added to Cleanup panel to switch between 'Outliner' and 'Object' options.

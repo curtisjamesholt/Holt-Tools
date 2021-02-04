@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Curtis Holt",
     "description" : "Just some workflow tools I put together.",
     "blender" : (2, 90, 1),
-    "version" : (0, 0, 2),
+    "version" : (0, 0, 3),
     "location" : "View3D",
     "warning" : "",
     "category" : "Generic"
@@ -37,6 +37,7 @@ class HTProperties(PropertyGroup):
         items=[
             ('OUTLINER', "Outliner", ""),
             ('OBJECT', "Object", ""),
+            ('MATERIALS', "Materials", ""),
         ],
         default = "OUTLINER"
     )
@@ -216,6 +217,16 @@ class HOLTTOOLS_OT_SetAutoSmooth(bpy.types.Operator):
         set_smooth_angle(ao(), ht_tool.autosmooth_angle)
         return {'FINISHED'}
 #endregion
+#region OPERATORS - CLEANUP - MATERIALS
+class HOLTTOOLS_OT_RemoveUnusedSlots(bpy.types.Operator):
+    bl_idname = "object.remove_unused_slots"
+    bl_label = "Remove Unused Slots"
+    bl_description = "Removes unused material slots from selected object"
+    bl_options = {'REGISTER', 'UNDO'}
+    def execute(self, context):
+        remove_unused_material_slots()
+        return {'FINISHED'}
+#endregion
 #region OPERATORS - SELECTION
 class HOLTTOOLS_OT_SelectAllIncluding(bpy.types.Operator):
     # Calling Select All Including
@@ -334,7 +345,11 @@ class HOLTTOOLS_OT_AddLightIntensityGlobal(bpy.types.Operator):
                     for n in nodes:
                         if n.type == 'EMISSION':
                             if ht_tool.light_node_includes in n.name:
-                                n.inputs[1].default_value += ht_tool.light_add_global
+                                if ht_tool.light_node_includes in n.name:
+                                    n.inputs[1].default_value += ht_tool.light_add_global
+                        if n.type == 'BSDF_PRINCIPLED':
+                            if ht_tool.light_node_includes in n.name:
+                                n.inputs[18].default_value += ht_tool.light_add_global
         return {'FINISHED'}
 class HOLTTOOLS_OT_SubtractLightIntensityGlobal(bpy.types.Operator):
     # Add Light Intensity Global
@@ -359,6 +374,9 @@ class HOLTTOOLS_OT_SubtractLightIntensityGlobal(bpy.types.Operator):
                         if n.type == 'EMISSION':
                             if ht_tool.light_node_includes in n.name:
                                 n.inputs[1].default_value -= ht_tool.light_add_global
+                        if n.type == 'BSDF_PRINCIPLED':
+                            if ht_tool.light_node_includes in n.name:
+                                n.inputs[18].default_value -= ht_tool.light_add_global
         return {'FINISHED'}
 class HOLTTOOLS_OT_MultiplyLightIntensityGlobal(bpy.types.Operator):
     # Multiply Light Intensity Global
@@ -383,6 +401,9 @@ class HOLTTOOLS_OT_MultiplyLightIntensityGlobal(bpy.types.Operator):
                         if n.type == 'EMISSION':
                             if ht_tool.light_node_includes in n.name:
                                 n.inputs[1].default_value *= ht_tool.light_multiply_global
+                        if n.type == 'BSDF_PRINCIPLED':
+                            if ht_tool.light_node_includes in n.name:
+                                n.inputs[18].default_value *= ht_tool.light_multiply_global
         return{'FINISHED'}
 #endregion
 #region OPERATORS - OPTIMIZATION
@@ -456,6 +477,10 @@ class OBJECT_PT_HoltToolsCleanup(Panel):
             row.prop(ht_tool, "autosmooth_angle", text="")
             row = col.row()
             row.operator("object.set_auto_smooth", text="^ Set Auto Smooth ^")
+            pass
+        if ht_tool.cleanup_mode == "MATERIALS":
+            row = col.row()
+            row.operator("object.remove_unused_slots", text="Remove Unused Slots")
             pass
 class OBJECT_PT_HoltToolsSelection(Panel):
     bl_idname = "OBJECT_PT_HoltToolsSelection"
@@ -647,6 +672,7 @@ classes = (
     HOLTTOOLS_OT_DeepClean,
     HOLTTOOLS_OT_PurgeUnwantedData,
     HOLTTOOLS_OT_SetAutoSmooth,
+    HOLTTOOLS_OT_RemoveUnusedSlots,
     # Selection
     HOLTTOOLS_OT_SelectAllIncluding,
     HOLTTOOLS_OT_SelectAllType,
