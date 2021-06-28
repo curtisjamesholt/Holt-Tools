@@ -15,7 +15,7 @@ bl_info = {
     "name" : "Holt Tools",
     "author" : "Curtis Holt",
     "description" : "Just some workflow tools I put together.",
-    "blender" : (2, 90, 1),
+    "blender" : (2, 90, 3),
     "version" : (0, 0, 3),
     "location" : "View3D",
     "warning" : "",
@@ -225,6 +225,14 @@ class HOLTTOOLS_OT_RemoveUnusedSlots(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, context):
         remove_unused_material_slots()
+        return {'FINISHED'}
+class HOLTTOOLS_OT_FixDuplicateNodeGroups(bpy.types.Operator):
+    bl_idname = "object.fix_duplicate_node_groups"
+    bl_label = "Fix Duplicate Node Groups"
+    bl_description = "Removes duplicate node groups and replaced with original"
+    bl_options = {'REGISTER', 'UNDO'}
+    def execute(self, context):
+        fix_duplicate_nodes()
         return {'FINISHED'}
 #endregion
 #region OPERATORS - SELECTION
@@ -481,6 +489,8 @@ class OBJECT_PT_HoltToolsCleanup(Panel):
         if ht_tool.cleanup_mode == "MATERIALS":
             row = col.row()
             row.operator("object.remove_unused_slots", text="Remove Unused Slots")
+            row = col.row()
+            row.operator("object.fix_duplicate_node_groups", text="Fix Duplicate Node Groups")
             pass
 class OBJECT_PT_HoltToolsSelection(Panel):
     bl_idname = "OBJECT_PT_HoltToolsSelection"
@@ -673,6 +683,7 @@ classes = (
     HOLTTOOLS_OT_PurgeUnwantedData,
     HOLTTOOLS_OT_SetAutoSmooth,
     HOLTTOOLS_OT_RemoveUnusedSlots,
+    HOLTTOOLS_OT_FixDuplicateNodeGroups,
     # Selection
     HOLTTOOLS_OT_SelectAllIncluding,
     HOLTTOOLS_OT_SelectAllType,
