@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Curtis Holt",
     "description" : "Just some workflow tools I put together.",
     "blender" : (2, 90, 3),
-    "version" : (0, 0, 3),
+    "version" : (0, 0, 4),
     "location" : "View3D",
     "warning" : "",
     "category" : "Generic"
