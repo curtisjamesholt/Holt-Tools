@@ -1,3 +1,36 @@
+=== 5.0.0 ===
+16/06/2022
+- Moving over to a different versioning format to make the addon more consistent with the BY-GEN addon.
+- Changed naming conventions of classes in the script to have a consistent prefix of 'HTOOLS'.
+- Changed Cleanup panel so the different operations are split into different sub-panels.
+- Added icons to the Cleanup panel and all new subpanels. Each icon is appropriate for the category.
+- Split up the region folding categories for each panel type inside of the python file.
+- Changed Lighting panel and split functionality into a subpanel of Power, more can be added as new operations are created.
+- Changed Selection panel and split functionality into subpanels for the different selection features.
+- Changed Optimization panel and created a mesh sub-panel for the quick decimate operation.
+- Fixed Select All Including operation to only search through objects in the current view layer, to prevent it from throwing an error where objects in other scenes cannot be set as selected.
+- Added 'Sync Mesh Name' operation under Cleanup - Objects which sets the mesh names of all selected objects to their object name, to keep things consistent.
+- Added 'Form Collection' operation which takes the input string, finds all objects which contain it in their name and created a new collection under the same name to move the objects to.
+
+17/06/2022
+- Added a new panel for Interface functionality and a sub-panel for theme operations. A quick access theme preset menu was also put in here so users can change their theme without having to go to the preferences.
+- Added Form Collection button to the Select By Type section as well so users can now create instant collections based on the object type chosen. This will also check whether a collection with the type name already exists, and if it does then it will move the remaining objects there instead of creating a new collection.
+- Added the pre-existing collection check to the Form Collection operation for Select All Including (string) version, created yesterday.
+- Added Form Collection operation to the Select By Vertex Count section to help people build collections of objects that do or do not fit within a certain vertex budget.
+- Added 'both' as an option for the light power changes, and fixed the input value for the Principled BSDF shader emission strength index. This allows both lamps and emissive light sources to be manipulated at the same time for complex scenes.
+- Improved the light power control operation with a better method for searching for the emission strength value on the principled BSDF shader. Before it was a hardcoded index, which became incorrect when new parameters were added or changed. Now is searched for the name properly with the help of an EasyBPY function.
+- Changed value to add/subtract power to light from an integer property to a float property for more finite control.
+- Added new World panel with volume subpanel.
+- Added Toggle World Volume operator to toggle mute status for principled volume and volume scatter nodes.
+- Changed Set Auto Smooth operation to work on all selected objects.
+- Added 'Shift to World Origin' operation which takes a selected point in edit mode, turns this into the objects origin and shifts it to the center of the world. This is a tool for recentering objects, requested by a community member.
+- Added Color subpanel to the Lighting panel, along with an RGP Vector Float property and an operation to set all selected light objects to the color `provided by that property. The default light color was set to white.
+- Added Randomize Light Color operator to randomize the color values of all selected light objects.
+
+18/06/2022
+- Added 'Selected Only' option for the color change operators and implemented them in both the 'Set Light Color' and 'Randomize Light Color' operations.
+- Added new section under the material sub-panel for the cleanup panel, for setting and getting the default values of selected node groups in the given material. This was otherwise known as my Node Sync Tool, previously available to Patrons. It has also been adjusted so the material does not have to be given, this is discovered automatically.
+
 === 0.0.4 ===
 
 - EasyBPY updates to 0.1.3.
