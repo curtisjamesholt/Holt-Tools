@@ -263,6 +263,44 @@ class HTOOLS_OT_ShiftToWorldOrigin(bpy.types.Operator):
         set_origin_to_cursor(ao())
         location(ao(), [0,0,0])
         return {'FINISHED'}
+class HTOOLS_OT_ApplyTransforms(bpy.types.Operator):
+    bl_idname = "object.apply_transforms"
+    bl_label = "Apply Transforms"
+    bl_description = "Apply the selected transforms to all objects"
+    bl_options = {'REGISTER', 'UNDO'}
+    def execute(self, context):
+        ht_tool = context.scene.ht_tool
+        
+        select_all_meshes()
+        bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+
+        select_all_curves()
+        bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+
+        select_all_surfaces()
+        bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+
+        select_all_metas()
+        bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+
+        select_all_armatures()
+        bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+
+        select_all_grease_pencils()
+        bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+
+        select_all_lattices()
+        bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+
+        select_all_empties()
+        bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+
+        select_all_cameras()
+        bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+
+        deselect_all_objects()
+       
+        return {'FINISHED'}
 #endregion
 #region OPERATORS - CLEANUP - MATERIALS
 class HTOOLS_OT_RemoveUnusedSlots(bpy.types.Operator):
@@ -857,6 +895,8 @@ class HTOOLS_PT_Cleanup_Objects(Panel):
         row.label(text="Other Operations")
         row = col.row()
         row.operator("object.sync_mesh_name", text="Sync Mesh Name")
+        row = col.row()
+        row.operator("object.apply_transforms", text="Apply transforms")
 class HTOOLS_PT_Cleanup_Materials(Panel):
     bl_idname = "HTOOLS_PT_Cleanup_Materials"
     bl_label = "Materials"
@@ -1290,6 +1330,7 @@ classes = (
     HTOOLS_OT_SetAutoSmooth,
     HTOOLS_OT_SyncMeshName,
     HTOOLS_OT_ShiftToWorldOrigin,
+    HTOOLS_OT_ApplyTransforms,
     HTOOLS_OT_RemoveUnusedSlots,
     HTOOLS_OT_FixDuplicateNodeGroups,
     HTOOLS_OT_SetNodeGroupDefaults,
