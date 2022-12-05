@@ -857,6 +857,8 @@ class HTOOLS_PT_Cleanup_Objects(Panel):
         row.label(text="Other Operations")
         row = col.row()
         row.operator("object.sync_mesh_name", text="Sync Mesh Name")
+        row = col.row()
+        row.operator("object.transform_apply", text="Apply Transforms")
 class HTOOLS_PT_Cleanup_Materials(Panel):
     bl_idname = "HTOOLS_PT_Cleanup_Materials"
     bl_label = "Materials"
