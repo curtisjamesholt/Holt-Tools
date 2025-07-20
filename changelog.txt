@@ -1,3 +1,8 @@
+=== 6.0.0 ===
+20/07/2025
+- Updated easybpy module to fix organization features.
+- Fixed node group input getter/setter.
+
 === 5.0.0 ===
 16/06/2022
 - Moving over to a different versioning format to make the addon more consistent with the BY-GEN addon.

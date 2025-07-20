@@ -15,8 +15,8 @@ bl_info = {
     "name" : "Holt Tools",
     "author" : "Curtis Holt",
     "description" : "Just some workflow tools I put together.",
-    "blender" : (3, 2, 0),
-    "version" : (5, 0, 0),
+    "blender" : (4, 5, 0),
+    "version" : (6, 0, 0),
     "location" : "View3D",
     "warning" : "",
     "category" : "Generic"
@@ -291,18 +291,23 @@ class HTOOLS_OT_SetNodeGroupDefaults(bpy.types.Operator):
         scene = context.scene
         ht_tool = scene.ht_tool
         #---
-        #materialname = ht_tool.material_name
         materialname = bpy.context.active_object.active_material.name
         material = bpy.data.materials[materialname]
         matnodes = material.node_tree.nodes
         i = 0
         while i < len(matnodes):
             if matnodes[i].select:
-                node_group = matnodes[i].node_tree
-                j = 0
-                while j < len(matnodes[i].inputs):
-                    node_group.inputs[j].default_value = matnodes[i].inputs[j].default_value
-                    j += 1
+                if matnodes[i].type == 'GROUP':
+                    node_group = matnodes[i].node_tree
+                    j = 0
+                    while j < len(matnodes[i].inputs):
+                        x = 0
+                        while x < len(node_group.interface.items_tree):
+                            if node_group.interface.items_tree[x].in_out == 'INPUT':
+                                if node_group.interface.items_tree[x].name == matnodes[i].inputs[j].name:
+                                    node_group.interface.items_tree[x].default_value = matnodes[i].inputs[j].default_value
+                            x += 1
+                        j += 1
             i += 1
         return {'FINISHED'}
 class HTOOLS_OT_GetNodeGroupDefaults(bpy.types.Operator):
@@ -315,18 +320,23 @@ class HTOOLS_OT_GetNodeGroupDefaults(bpy.types.Operator):
         scene = context.scene
         ht_tool = scene.ht_tool
         #---
-        #materialname = ht_tool.material_name
         materialname = bpy.context.active_object.active_material.name
         material = bpy.data.materials[materialname]
         matnodes = material.node_tree.nodes
         i = 0
         while i < len(matnodes):
             if matnodes[i].select:
-                node_group = matnodes[i].node_tree
-                j = 0
-                while j < len(matnodes[i].inputs):
-                    matnodes[i].inputs[j].default_value = node_group.inputs[j].default_value
-                    j += 1
+                if matnodes[i].type == 'GROUP':
+                    node_group = matnodes[i].node_tree
+                    j = 0
+                    while j < len(matnodes[i].inputs):
+                        x = 0
+                        while x < len(node_group.interface.items_tree):
+                            if node_group.interface.items_tree[x].in_out == 'INPUT':
+                                if node_group.interface.items_tree[x].name == matnodes[i].inputs[j].name:
+                                    matnodes[i].inputs[j].default_value = node_group.interface.items_tree[x].default_value
+                            x += 1
+                        j += 1
             i += 1
         return {'FINISHED'}
 #endregion

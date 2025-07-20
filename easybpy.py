@@ -1,6 +1,6 @@
 #region INFO
 '''
-    == EasyBPY 0.1.4 ==
+    == EasyBPY Adaptive Versioning ==
     Managed by Curtis Holt
     https://curtisholt.online/links
     ---
@@ -13,6 +13,10 @@
     folder in the user preferences. The file can also be re-packaged with
     any other addon, so long as the developer respects the limitations of
     the GPL license, outlined below.
+
+    Please note that this file has been structurally designed to be used
+    with text region folding, which can be used in Visual Studio Code by
+    pressing CTRL+K+0. Treat the region folds like chapters of a book.
 '''
 '''
     This program is free software: you can redistribute it and/or modify
@@ -30,13 +34,11 @@
 '''
 #endregion
 #region IMPORTS
-import re
 import bpy
 import bpy.types
 from mathutils import Vector, Matrix, Euler
 import math
 import random
-from math import radians
 #endregion
 #region RENDER SETTINGS
 def set_render_engine_to_cycles():
@@ -46,7 +48,7 @@ def set_render_engine_cycles():
     set_render_engine_to_cycles()
 
 def set_render_engine_to_eevee():
-    get_scene().render.engine = 'BLENDER_EEVEE'
+    get_scene().render.engine = 'BLENDER_EEVEE_NEXT'
 
 def set_render_engine_eevee():
     set_render_engine_to_eevee()
@@ -516,7 +518,10 @@ def convert_to_grease_pencil(ref):
     objref = get_object(ref)
     deselect_all_objects()
     select_object(objref)
-    bpy.ops.object.convert(target='GPENCIL')
+    grease_pencil = 'GPENCIL'
+    if bpy.app.version >= (4, 5, 0):
+        grease_pencil= 'GREASEPENCIL'
+    bpy.ops.object.convert(target=grease_pencil)
 
 def convert_to_curve(ref):
     objref = get_object(ref)
@@ -559,7 +564,10 @@ def select_all_empties():
     bpy.ops.object.select_by_type(type='EMPTY')
 
 def select_all_grease_pencils():
-    bpy.ops.object.select_by_type(type='GPENCIL')
+    grease_pencil = 'GPENCIL'
+    if bpy.app.version >= (4, 5, 0):
+        grease_pencil= 'GREASEPENCIL'
+    bpy.ops.object.select_by_type(type=grease_pencil)
 
 def select_all_cameras():
     bpy.ops.object.select_by_type(type='CAMERA')
@@ -592,7 +600,7 @@ def select_objects_with_modifiers():
 # Custom Selection
 def get_objects_including(include, case_sensitive = True):
     objlist = []
-    for o in bpy.context.view_layer.objects: #bpy.data.objects
+    for o in bpy.context.view_layer.objects:
         if case_sensitive is True:
             if include in o.name:
                 objlist.append(o)
@@ -602,7 +610,7 @@ def get_objects_including(include, case_sensitive = True):
     return objlist
 
 def select_objects_including(include, case_sensitive = True):
-    for o in bpy.context.view_layer.objects: #bpy.data.objects
+    for o in bpy.context.view_layer.objects:
         if case_sensitive is True:
             if include in o.name:
                 o.select_set(True)
@@ -1468,6 +1476,11 @@ def remove_keyframe(keyframes):
         # Updating Interface:
         for area in bpy.context.screen.areas:
             area.tag_redraw()
+            
+def delete_animation_data(ref = None): # [ ]
+    objs = get_objects(ref)
+    for obj in objs:
+        obj.animation_data_clear()
 #endregion
 #region DRIVERS
 
@@ -1628,7 +1641,7 @@ def set_smooth_angle(ref, degrees = 60):
         objref = ref
     if objref.data.use_auto_smooth == False:
         objref.data.use_auto_smooth = True
-    objref.data.auto_smooth_angle = radians(degrees)
+    objref.data.auto_smooth_angle = math.radians(degrees)
 #endregion
 #region LIGHTING
 def get_light(ref):
@@ -1828,7 +1841,7 @@ def create_collection(name):
         return colref
     return False
 
-def delete_collection(col, delete_objects = False):
+def delete_collection(col, delete_objects = False, link_objects = False):
     colref = None
     if is_string(col):
             colref = get_collection(col)
@@ -1839,13 +1852,15 @@ def delete_collection(col, delete_objects = False):
         deselect_all_objects()
         if len(colref.objects) > 0:
             for co in colref.objects:
-                co.select_set(True)
+                if co.name in bpy.context.view_layer.objects:
+                    co.select_set(True)
             delete_selected_objects()
     else:
         deselect_all_objects()
         if len(colref.objects) > 0:
-            for co in colref.objects:
-                bpy.context.scene.collection.objects.link(co)
+            if link_objects:
+                for co in colref.objects:
+                    bpy.context.scene.collection.objects.link(co)
 
     bpy.data.collections.remove(colref)
 
@@ -1875,7 +1890,7 @@ def delete_hierarchy(col):
             delete_hierarchy(co)
     deselect_all_objects()
     delete_objects_in_collection(colref)
-    delete_collection(colref)
+    delete_collection(colref, False)
 
 def duplicate_collection(col):
     colref = None
@@ -1922,6 +1937,54 @@ def set_active_collection(ref):
         colref = ref
     hir = bpy.context.view_layer.layer_collection
     search_layer_collection_in_hierarchy_and_set_active(colref, hir)
+
+def select_collection(ref):
+    set_active_collection(ref)
+
+def hide_collection_viewport(ref=None):
+    col = get_collection(ref)
+    col.hide_viewport = True
+
+# most people will probably expect the viewport collection to be hidden with this function name
+def hide_collection(ref=None):
+    hide_collection_viewport(ref)
+
+def hide_collection_render(ref=None):
+    col = get_collection(ref)
+    col.hide_render = True
+
+def hide_collection_select(ref=None):
+    col = get_collection(ref)
+    col.hide_select = True
+
+def show_collection_viewport(ref=None):
+    col = get_collection(ref)
+    col.hide_viewport = False
+
+# most people will probably expect the viewport collection to be unhidden with this function name
+def show_collection(ref=None):
+    show_collection_viewport(ref)
+
+def show_collection_render(ref=None):
+    col = get_collection(ref)
+    col.hide_render = False
+
+def show_collection_select(ref=None):
+    col = get_collection(ref)
+    col.hide_select = False
+
+def unhide_collection_viewport(ref=None):
+    show_collection_viewport(ref)
+
+# most people will probably expect the viewport collection to be hidden with this function name
+def unhide_collection(ref=None):
+    unhide_collection_viewport(ref)
+
+def unhide_collection_render(ref=None):
+    show_collection_render(ref)
+
+def unhide_collection_select(ref=None):
+    show_collection_select(ref)
 
 # Dev Function
 def search_layer_collection_in_hierarchy_and_set_active(colref, hir) :
@@ -1996,9 +2059,10 @@ def move_objects_to_collection(ref, col):
     else:
         colref = col
     for o in objs:
-        for c in o.users_collection:
-            c.objects.unlink(o)
-        link_object_to_collection(o, colref)
+        if o.is_editable:
+            for c in o.users_collection:
+                c.objects.unlink(o)
+            link_object_to_collection(o, colref)
 
 def get_object_collection(ref):
     objref = get_object(ref)
@@ -3415,6 +3479,9 @@ def get_particle_systems_containing(name, ref):
             result.append(p)
     return result
 
+def is_any_selected_object_editable():
+     return any(obj.is_editable for obj in bpy.context.selected_objects)
+
 def organize_outliner():
     d = deselect_all_objects
     c = create_collection
@@ -3426,11 +3493,12 @@ def organize_outliner():
         if bpy.context.active_object.mode != 'OBJECT':
             bpy.ops.object.mode_set(mode='OBJECT')
 
+    print("Organizing outliner...")
     # Cameras
     d()
     select_all_cameras()
     colname = "Cameras"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3443,7 +3511,7 @@ def organize_outliner():
     d()
     select_all_lights()
     colname = "Lights"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3456,7 +3524,7 @@ def organize_outliner():
     d()
     select_all_empties()
     colname = "Empties"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3469,7 +3537,7 @@ def organize_outliner():
     d()
     select_all_meshes()
     colname = "Objects"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3482,7 +3550,7 @@ def organize_outliner():
     d()
     select_all_curves()
     colname = "Curves"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3495,7 +3563,7 @@ def organize_outliner():
     d()
     select_all_surfaces()
     colname = "Surfaces"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3508,7 +3576,7 @@ def organize_outliner():
     d()
     select_all_metas()
     colname = "Metas"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3521,7 +3589,7 @@ def organize_outliner():
     d()
     select_all_text()
     colname = "Text"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3534,7 +3602,7 @@ def organize_outliner():
     d()
     select_all_volumes()
     colname = "Volumes"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3547,7 +3615,7 @@ def organize_outliner():
     d()
     select_all_armatures()
     colname = "Armatures"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3560,7 +3628,7 @@ def organize_outliner():
     d()
     select_all_lattices()
     colname = "Lattices"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3573,7 +3641,7 @@ def organize_outliner():
     d()
     select_all_grease_pencils()
     colname = "Grease Pencils"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3586,7 +3654,7 @@ def organize_outliner():
     d()
     select_all_light_probes()
     colname = "Light Probes"
-    if len(so())>0:
+    if is_any_selected_object_editable() and len(so())>0:
         col = None
         if ce(colname):
             col = gc(colname)
@@ -3601,38 +3669,36 @@ def organize_outliner():
 def suffix_convert_dataset(data):
     for d in data:
         nn = d.name
-        exclude = ["png", "jpg", "jpeg", "tif", "tiff", "bmp", "sgi", "rgb", "bw", "jp2", "j2c", "tga", "cin", "dpx", "exr", "hdr", "webp"]
-        if not any(x in nn for x in exclude):
-            if '_' in d.name:
-                r = d.name.split('_')
-                if '.' in r[-1]:
-                    r2 = r[-1].split('.')
-                    if r2[0].isdigit():
-                        val = int(r2[0]) + int(r2[1])
-                        nn = r[0] + '_' + str(val)
-                        i = 1
-                        while nn in data:
-                            nn = r[0] + '_' + str(val + i)
-                            i += 1
-                    else:
-                        if r2[1].isdigit():
-                            val = int(r2[1])
-                            i = 0
-                            nn = ""
-                            while i < len(r)-1:
-                                nn = nn + r[i] + "_"
-                                i+=1
-                            nn = nn + r2[0] + "_" + str(val)
-            else:
-                if '.' in d.name:
-                    r = d.name.split('.')
-                    if r[-1].isdigit():
-                        val = int(r[-1])
-                        nn = r[0] + '_' + str(val)
-                        i = 1
-                        while nn in data:
-                            nn = r[0] + '_' + str(val + i)
-                            i += 1
+        if '_' in d.name:
+            r = d.name.split('_')
+            if '.' in r[-1]:
+                r2 = r[-1].split('.')
+                if r2[0].isdigit():
+                    val = int(r2[0]) + int(r2[1])
+                    nn = r[0] + '_' + str(val)
+                    i = 1
+                    while nn in data:
+                        nn = r[0] + '_' + str(val + i)
+                        i += 1
+                else:
+                    if r2[1].isdigit():
+                        val = int(r2[1])
+                        i = 0
+                        nn = ""
+                        while i < len(r)-1:
+                            nn = nn + r[i] + "_"
+                            i+=1
+                        nn = nn + r2[0] + "_" + str(val)
+        else:
+            if '.' in d.name:
+                r = d.name.split('.')
+                if r[-1].isdigit():
+                    val = int(r[-1])
+                    nn = r[0] + '_' + str(val)
+                    i = 1
+                    while nn in data:
+                        nn = r[0] + '_' + str(val + i)
+                        i += 1
         d.name = nn
 
 def convert_suffixes_underscore():
@@ -3647,11 +3713,21 @@ def convert_suffixes():
 
 def trim_view_layer_suffixes():
     for o in bpy.context.view_layer.objects:
-        if '.' in o.name:
-            name_split = o.name.split('.')
-            if name_split[-1] == '001':
-                del name_split[-1]
-            o.name = ''.join(name_split)
+        if o is None:
+            continue
+        if o.name.endswith(".001"):
+            newname = o.name[:-4]
+            if newname in bpy.data.objects:
+                #if bpy.app.version >= (4, 3, 0):
+                    #o.rename(newname, mode="ALWAYS")
+                #else:
+                # Rename the existing object to avoid conflict.
+                conflicting_object = bpy.data.objects[newname]
+                if conflicting_object.is_editable:
+                    conflicting_object.name = newname + "_old"
+                    o.name = newname
+                else:
+                    print(f"Cannot rename {o.name} as this name has conflict with a read-only object.")
 
 def add_prefix_to_name(ref, prefix, delim="_"):
     objlist = make_obj_list(ref)
