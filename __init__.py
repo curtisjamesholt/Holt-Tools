@@ -328,6 +328,25 @@ class HTOOLS_OT_SetNodeGroupDefaults(bpy.types.Operator):
                                 x += 1
                             j += 1
                 i += 1
+        
+        # Set Geometry Nodes
+        for n in bpy.data.node_groups:
+            geonodes = n.nodes
+            i = 0
+            while i < len(geonodes):
+                if geonodes[i].select:
+                    if geonodes[i].type == 'GROUP':
+                        node_group = geonodes[i].node_tree
+                        j = 0
+                        while j < len(geonodes[i].inputs):
+                            x = 0
+                            while x < len(node_group.interface.items_tree):
+                                if node_group.interface.items_tree[x].in_out == 'INPUT':
+                                    if node_group.interface.items_tree[x].name == geonodes[i].inputs[j].name:
+                                        node_group.interface.items_tree[x].default_value = geonodes[i].inputs[j].default_value
+                                x += 1
+                            j += 1
+                i += 1
 
         return {'FINISHED'}
 class HTOOLS_OT_GetNodeGroupDefaults(bpy.types.Operator):
@@ -363,7 +382,7 @@ class HTOOLS_OT_GetNodeGroupDefaults(bpy.types.Operator):
                             j += 1
                 i += 1
         
-        # Set World Shader Nodes
+        # Get World Shader Nodes
         for w in bpy.data.worlds:
             worldnodes = w.node_tree.nodes
             i = 0
@@ -378,6 +397,25 @@ class HTOOLS_OT_GetNodeGroupDefaults(bpy.types.Operator):
                                 if node_group.interface.items_tree[x].in_out == 'INPUT':
                                     if node_group.interface.items_tree[x].name == worldnodes[i].inputs[j].name:
                                          worldnodes[i].inputs[j].default_value = node_group.interface.items_tree[x].default_value
+                                x += 1
+                            j += 1
+                i += 1
+
+        # Get Geometry Nodes
+        for n in bpy.data.node_groups:
+            geonodes = n.nodes
+            i = 0
+            while i < len(geonodes):
+                if geonodes[i].select:
+                    if geonodes[i].type == 'GROUP':
+                        node_group = geonodes[i].node_tree
+                        j = 0
+                        while j < len(geonodes[i].inputs):
+                            x = 0
+                            while x < len(node_group.interface.items_tree):
+                                if node_group.interface.items_tree[x].in_out == 'INPUT':
+                                    if node_group.interface.items_tree[x].name == geonodes[i].inputs[j].name:
+                                        geonodes[i].inputs[j].default_value = node_group.interface.items_tree[x].default_value
                                 x += 1
                             j += 1
                 i += 1
