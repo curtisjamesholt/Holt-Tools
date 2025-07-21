@@ -290,25 +290,45 @@ class HTOOLS_OT_SetNodeGroupDefaults(bpy.types.Operator):
         layout = self.layout
         scene = context.scene
         ht_tool = scene.ht_tool
-        #---
-        materialname = bpy.context.active_object.active_material.name
-        material = bpy.data.materials[materialname]
-        matnodes = material.node_tree.nodes
-        i = 0
-        while i < len(matnodes):
-            if matnodes[i].select:
-                if matnodes[i].type == 'GROUP':
-                    node_group = matnodes[i].node_tree
-                    j = 0
-                    while j < len(matnodes[i].inputs):
-                        x = 0
-                        while x < len(node_group.interface.items_tree):
-                            if node_group.interface.items_tree[x].in_out == 'INPUT':
-                                if node_group.interface.items_tree[x].name == matnodes[i].inputs[j].name:
-                                    node_group.interface.items_tree[x].default_value = matnodes[i].inputs[j].default_value
-                            x += 1
-                        j += 1
-            i += 1
+
+        # Set Material Shader Nodes
+        for m in bpy.data.materials:
+            matnodes = m.node_tree.nodes
+            i = 0
+            while i < len(matnodes):
+                if matnodes[i].select:
+                    if matnodes[i].type == 'GROUP':
+                        node_group = matnodes[i].node_tree
+                        j = 0
+                        while j < len(matnodes[i].inputs):
+                            x = 0
+                            while x < len(node_group.interface.items_tree):
+                                if node_group.interface.items_tree[x].in_out == 'INPUT':
+                                    if node_group.interface.items_tree[x].name == matnodes[i].inputs[j].name:
+                                        node_group.interface.items_tree[x].default_value = matnodes[i].inputs[j].default_value
+                                x += 1
+                            j += 1
+                i += 1
+        
+        # Set World Shader Nodes
+        for w in bpy.data.worlds:
+            worldnodes = w.node_tree.nodes
+            i = 0
+            while i < len(worldnodes):
+                if worldnodes[i].select:
+                    if worldnodes[i].type == 'GROUP':
+                        node_group = worldnodes[i].node_tree
+                        j = 0
+                        while j < len(worldnodes[i].inputs):
+                            x = 0
+                            while x < len(node_group.interface.items_tree):
+                                if node_group.interface.items_tree[x].in_out == 'INPUT':
+                                    if node_group.interface.items_tree[x].name == worldnodes[i].inputs[j].name:
+                                        node_group.interface.items_tree[x].default_value = worldnodes[i].inputs[j].default_value
+                                x += 1
+                            j += 1
+                i += 1
+
         return {'FINISHED'}
 class HTOOLS_OT_GetNodeGroupDefaults(bpy.types.Operator):
     bl_idname = "object.get_node_group_defaults"
@@ -323,21 +343,45 @@ class HTOOLS_OT_GetNodeGroupDefaults(bpy.types.Operator):
         materialname = bpy.context.active_object.active_material.name
         material = bpy.data.materials[materialname]
         matnodes = material.node_tree.nodes
-        i = 0
-        while i < len(matnodes):
-            if matnodes[i].select:
-                if matnodes[i].type == 'GROUP':
-                    node_group = matnodes[i].node_tree
-                    j = 0
-                    while j < len(matnodes[i].inputs):
-                        x = 0
-                        while x < len(node_group.interface.items_tree):
-                            if node_group.interface.items_tree[x].in_out == 'INPUT':
-                                if node_group.interface.items_tree[x].name == matnodes[i].inputs[j].name:
-                                    matnodes[i].inputs[j].default_value = node_group.interface.items_tree[x].default_value
-                            x += 1
-                        j += 1
-            i += 1
+
+        # Get Material Shader Nodes
+        for m in bpy.data.materials:
+            matnodes = m.node_tree.nodes
+            i = 0
+            while i < len(matnodes):
+                if matnodes[i].select:
+                    if matnodes[i].type == 'GROUP':
+                        node_group = matnodes[i].node_tree
+                        j = 0
+                        while j < len(matnodes[i].inputs):
+                            x = 0
+                            while x < len(node_group.interface.items_tree):
+                                if node_group.interface.items_tree[x].in_out == 'INPUT':
+                                    if node_group.interface.items_tree[x].name == matnodes[i].inputs[j].name:
+                                        matnodes[i].inputs[j].default_value = node_group.interface.items_tree[x].default_value
+                                x += 1
+                            j += 1
+                i += 1
+        
+        # Set World Shader Nodes
+        for w in bpy.data.worlds:
+            worldnodes = w.node_tree.nodes
+            i = 0
+            while i < len(worldnodes):
+                if worldnodes[i].select:
+                    if worldnodes[i].type == 'GROUP':
+                        node_group = worldnodes[i].node_tree
+                        j = 0
+                        while j < len(worldnodes[i].inputs):
+                            x = 0
+                            while x < len(node_group.interface.items_tree):
+                                if node_group.interface.items_tree[x].in_out == 'INPUT':
+                                    if node_group.interface.items_tree[x].name == worldnodes[i].inputs[j].name:
+                                         worldnodes[i].inputs[j].default_value = node_group.interface.items_tree[x].default_value
+                                x += 1
+                            j += 1
+                i += 1
+
         return {'FINISHED'}
 #endregion
 #region OPERATORS - SELECTION
