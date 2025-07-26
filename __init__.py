@@ -359,9 +359,6 @@ class HTOOLS_OT_GetNodeGroupDefaults(bpy.types.Operator):
         scene = context.scene
         ht_tool = scene.ht_tool
         #---
-        materialname = bpy.context.active_object.active_material.name
-        material = bpy.data.materials[materialname]
-        matnodes = material.node_tree.nodes
 
         # Get Material Shader Nodes
         for m in bpy.data.materials:
